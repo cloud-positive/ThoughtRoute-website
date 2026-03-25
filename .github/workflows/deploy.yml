@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/thoughtroute-website/nextjs
+  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/throughtroute/nextjs
 
 jobs:
   deploy:
