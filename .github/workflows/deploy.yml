@@ -1,0 +1,47 @@
+name: Deploy to dev VM
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/thoughtroute/nextjs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and push image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_SANITY_PROJECT_ID=${{ secrets.SANITY_PROJECT_ID }} \
+            --build-arg NEXT_PUBLIC_SANITY_DATASET=${{ secrets.SANITY_DATASET }} \
+            -t $IMAGE:latest .
+          docker push $IMAGE:latest
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          script: |
+            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+            docker pull us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/thoughtroute/nextjs:latest
+            docker stop thoughtroute || true
+            docker rm thoughtroute || true
+            docker run -d --name thoughtroute \
+              -p 3001:3000 \
+              --restart always \
+              us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/thoughtroute/nextjs:latest
+            docker exec cp-nginx-certbot-nginx-1 nginx -s reload

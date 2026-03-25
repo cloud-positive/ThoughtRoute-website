@@ -1,7 +1,18 @@
 import Link from "next/link";
 import { Linkedin, Twitter, Facebook, Instagram, Mail, Phone, MapPin } from "lucide-react";
 
-const footerSections = [
+interface FooterLink {
+    name: string;
+    href: string;
+    isExternal?: boolean;
+}
+
+interface FooterSection {
+    title: string;
+    links: FooterLink[];
+}
+
+const footerSections: FooterSection[] = [
     {
         title: "Explore",
         links: [
