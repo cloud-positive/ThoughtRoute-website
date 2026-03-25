@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-const navLinks = [
+interface NavLink {
+    name: string;
+    href: string;
+    hasDropdown?: boolean;
+}
+
+const navLinks: NavLink[] = [
     { name: "Home", href: "/" },
     { name: "Services", href: "/services", hasDropdown: true },
     { name: "Products", href: "/#projects", hasDropdown: true },
@@ -47,7 +53,14 @@ const servicesMegaMenu = [
     }
 ];
 
-const productsMegaMenu = [
+interface ProductItem {
+    name: string;
+    desc: string;
+    href: string;
+    isExternal?: boolean;
+}
+
+const productsMegaMenu: ProductItem[] = [
     {
         name: "CloudPositive",
         desc: "India's Cloud Infrastructure & Support Expert.",
